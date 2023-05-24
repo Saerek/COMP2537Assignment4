@@ -2,43 +2,138 @@ const setup = () => {
     let firstCard = undefined;
     let secondCard = undefined;
     let pairsMatched = 0;
-    const totalPairs = $(".card").length / 2; // Assuming each card has a pair
+    let totalPairs = 0;
     let numClicks = 0;
-    let numPairsLeft = totalPairs;
+    let numPairsLeft = 0;
     let numPairsMatched = 0;
-    let timerInterval; // Timer interval ID
-    let startTime; // Starting time of the timer
-    let gameStarted = false; // Game status
-    let flippedCardsCount = 0; // Number of flipped cards
-    let flipBackTimeout; // Timeout ID for flipping back mismatched cards
+    let timerInterval;
+    let startTime;
+    let gameStarted = false;
+    let flippedCardsCount = 0;
+    let flipBackTimeout;
+    let maxTime = 300;
+    let powerUpsUsed = 0;
+    const powerUpLimit = 3;
   
-    const flipCard = function () {
-      if (!gameStarted) {
-        return; // Ignore if the game has not started yet
+    // Dark mode and light mode toggle
+    $("#darkModeToggle").on("change", function () {
+      if ($(this).is(":checked")) {
+        $("body").addClass("dark-mode");
+        $(".card").addClass("dark-mode");
+      } else {
+        $("body").removeClass("dark-mode");
+        $(".card").removeClass("dark-mode");
+      }
+    });
+  
+    // Power-up button event handler
+    const usePowerUp = () => {
+      if (powerUpsUsed >= powerUpLimit) {
+        return; // Power-up limit reached
       }
   
-      if (
-        $(this).hasClass("flip") ||
-        $(this).hasClass("matched") ||
-        firstCard === this ||
-        secondCard === this
-      ) {
-        return; // Ignore if already flipped, matched, or clicked again
+      $(".card:not(.matched)").addClass("flip"); // Flip all unmatched cards
+  
+      // Wait for a brief duration and then flip back the unmatched cards
+      setTimeout(() => {
+        $(".card:not(.matched)").removeClass("flip");
+      }, 1500);
+  
+      powerUpsUsed++;
+      $("#powerUpCount").text(`Power-Up Count: ${powerUpsUsed}`);
+  
+      // Disable the power-up button if the limit is reached
+      if (powerUpsUsed >= powerUpLimit) {
+        $("#powerUpButton").prop("disabled", true);
+      }
+    };
+  
+    $("#powerUpButton").on("click", usePowerUp);
+  
+    // Check the initial state of the dark mode toggle
+    $("#darkModeToggle").prop("checked", $("body").hasClass("dark-mode"));
+  
+    const createGameGrid = (rows, cols) => {
+      const totalCards = rows * cols;
+      const cardPairs = totalCards / 2;
+      const apiUrl =
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/";
+  
+      fetch(`https://pokeapi.co/api/v2/pokemon?limit=${cardPairs}`)
+        .then((response) => response.json())
+        .then((data) => {
+          const pokemonUrls = [];
+          const promises = data.results.map((pokemon) => {
+            const randomId = Math.floor(Math.random() * 898) + 1; // Generate random Pokémon ID from 1 to 898
+            const pokemonImage = `${apiUrl}${randomId}.png`;
+            pokemonUrls.push(pokemonImage);
+          });
+  
+          Promise.all(promises).then(() => {
+            const cardImagesDoubled = pokemonUrls.concat(pokemonUrls);
+            const shuffledCardImages = shuffle(cardImagesDoubled);
+  
+            $("#game_grid").empty().append('<div class="game-grid"></div>');
+            const gameGrid = $("#game_grid .game-grid");
+  
+            for (let i = 0; i < totalCards; i++) {
+                const cardImage = shuffledCardImages[i];
+                const card = `<div class="card">
+                  <img class="front_face" src="${cardImage}" alt="">
+                  <img class="back_face" src="back.webp" alt="">
+                </div>`;
+                $("#game_grid").append(card);
+              }
+            $("#game_grid").on("click", ".card", flipCard);
+          });
+        });
+    };
+  
+    // Function to shuffle the array
+    const shuffle = (array) => {
+      let currentIndex = array.length;
+      let temporaryValue;
+      let randomIndex;
+  
+      while (currentIndex !== 0) {
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1;
+  
+        temporaryValue = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = temporaryValue;
       }
   
-      $(this).toggleClass("flip");
+      return array;
+    };
   
-      numClicks++;
-      $("#numClicks").text(`Number of Clicks: ${numClicks}`);
-  
-      if (!firstCard) {
-        firstCard = this;
-      } else if (!secondCard) {
-        secondCard = this;
-        console.log(firstCard, secondCard);
-  
-        const firstCardImageSrc = $(firstCard).find(".front_face").attr("src");
-        const secondCardImageSrc = $(secondCard).find(".front_face").attr("src");
+      const flipCard = function () {
+        if (!gameStarted) {
+          return;
+        }
+      
+        if (
+          $(this).hasClass("flip") ||
+          $(this).hasClass("matched") ||
+          firstCard === this ||
+          secondCard === this
+        ) {
+          return;
+        }
+      
+        $(this).toggleClass("flip");
+      
+        numClicks++;
+        $("#numClicks").text(`Number of Clicks: ${numClicks}`);
+      
+        if (!firstCard) {
+          firstCard = $(this); // Retrieve jQuery representation of the first card
+        } else if (!secondCard) {
+          secondCard = $(this); // Retrieve jQuery representation of the second card
+          console.log(firstCard, secondCard);
+      
+          const firstCardImageSrc = firstCard.find(".front_face").attr("src"); // Retrieve the image source of the first card
+          const secondCardImageSrc = secondCard.find(".front_face").attr("src"); // Retrieve the image source of the second card
   
         if (firstCardImageSrc === secondCardImageSrc) {
           console.log("match");
@@ -55,44 +150,50 @@ const setup = () => {
             $("#winningMessage").text("Congratulations! You won the game!");
             $("#winMsg").show();
             stopTimer();
+            gameStarted = false;
           }
   
-          // Reset selected cards
+          checkGameStatus();
+  
           firstCard = undefined;
           secondCard = undefined;
         } else {
           console.log("no match");
-          clearTimeout(flipBackTimeout); // Clear previous timeout if exists
-  
-          // Flip back mismatched cards after a delay
+          clearTimeout(flipBackTimeout);
           flipBackTimeout = setTimeout(() => {
             $(firstCard).removeClass("flip");
             $(secondCard).removeClass("flip");
-  
-            // Reset selected cards
             firstCard = undefined;
             secondCard = undefined;
           }, 1000);
   
-          // Reset flipped cards count
-          flippedCardsCount = 0;
+          flippedCardsCount += 2;
+  
+          if (flippedCardsCount > 2) {
+            clearTimeout(flipBackTimeout);
+            $(".card.flip:not(.matched)").removeClass("flip");
+            flippedCardsCount = 0;
+            firstCard = undefined;
+            secondCard = undefined;
+          }
         }
   
-        // Increment flipped cards count
-        flippedCardsCount += 2;
-  
-        // Check if additional cards have been flipped during the delay
-        if (flippedCardsCount > 2) {
-          clearTimeout(flipBackTimeout); // Clear previous timeout
-          $(".card.flip:not(.matched)").removeClass("flip"); // Flip back all flipped cards
-          flippedCardsCount = 0; // Reset flipped cards count
-          firstCard = undefined;
-          secondCard = undefined;
-        }
+        $("#numPairsLeft").text(`Pairs Left: ${numPairsLeft}`);
+        $("#numPairsMatched").text(`Pairs Matched: ${numPairsMatched}`);
       }
+    };
   
-      $("#numPairsLeft").text(`Pairs Left: ${numPairsLeft}`);
-      $("#numPairsMatched").text(`Pairs Matched: ${numPairsMatched}`);
+   
+
+    const checkGameStatus = () => {
+      const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+  
+      if (elapsedTime >= maxTime) {
+        $("#winningMessage").text("You failed! Time's up.");
+        $("#winMsg").show();
+        stopTimer();
+        gameStarted = false;
+      }
     };
   
     const startTimer = () => {
@@ -109,36 +210,80 @@ const setup = () => {
       $("#timer").text(`Time: ${elapsedTime} seconds`);
     };
   
-    $(".card").on("click", flipCard);
-  
-    $("#startButton").on("click", function () {
-      if (gameStarted) {
-        return; // Ignore if the game is already started
-      }
-  
-      $(".card").on("click", flipCard);
+    const startGame = () => {
+      gameStarted = true;
       startTimer();
-      gameStarted = true; // Set game status to started
-    });
+      checkGameStatus();
+    };
   
-    $("#resetButton").on("click", function () {
-      clearTimeout(flipBackTimeout); // Clear flip back timeout if exists
+    const resetGame = () => {
+      clearTimeout(flipBackTimeout);
       $(".card").removeClass("flip matched");
-      $(".card").on("click", flipCard);
+      $(".card").off("click");
       firstCard = undefined;
       secondCard = undefined;
       pairsMatched = 0;
       numClicks = 0;
       numPairsLeft = totalPairs;
       numPairsMatched = 0;
-      flippedCardsCount = 0; // Reset flipped cards count
+      flippedCardsCount = 0;
       $("#numClicks").text(`Number of Clicks: ${numClicks}`);
       $("#numPairsLeft").text(`Pairs Left: ${numPairsLeft}`);
       $("#numPairsMatched").text(`Pairs Matched: ${numPairsMatched}`);
       $("#winningMessage").text("");
       $("#winMsg").hide();
       stopTimer();
-      gameStarted = false; // Set game status to not started
+      gameStarted = false;
+    };
+  
+    $("#easyButton").on("click", function () {
+      if (gameStarted) {
+        return;
+      }
+  
+      resetGame();
+      createGameGrid(2, 3);
+      totalPairs = 3;
+      numPairsLeft = totalPairs;
+      $("#numPairsLeft").text(`Pairs Left: ${numPairsLeft}`);
     });
-  }
-$(document).ready(setup)
+  
+    $("#normalButton").on("click", function () {
+      if (gameStarted) {
+        return;
+      }
+  
+      resetGame();
+      createGameGrid(3, 4);
+      totalPairs = 6;
+      numPairsLeft = totalPairs;
+      $("#numPairsLeft").text(`Pairs Left: ${numPairsLeft}`);
+    });
+  
+    $("#hardButton").on("click", function () {
+      if (gameStarted) {
+        return;
+      }
+  
+      resetGame();
+      createGameGrid(4, 5);
+      totalPairs = 10;
+      numPairsLeft = totalPairs;
+      $("#numPairsLeft").text(`Pairs Left: ${numPairsLeft}`);
+    });
+  
+    $("#startButton").on("click", function () {
+      if (gameStarted) {
+        return;
+      }
+  
+      startGame(); // Call startGame function to start the game
+    });
+  
+    $("#resetButton").on("click", function () {
+      resetGame();
+    });
+  };
+  
+  $(document).ready(setup);
+  

@@ -1,63 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css" />
+    <!-- import jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="index.js"></script>
+  </head>
 
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-  <link rel="stylesheet" href="style.css">
-  <!-- import jQuery -->
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <script src="index.js"></script>
-</head>
-
-<body>
-
+  <body>
     <div id="header">
-        <p id="numClicks">Number of Clicks: 0</p>
-        <p id="numPairsLeft">Pairs Left: 3</p>
-        <p id="numPairsMatched">Pairs Matched: 0</p>
-        <p id="totalPairs">Total Pairs: 3</p>
+      <p id="numClicks">Number of Clicks: 0</p>
+      <p id="numPairsLeft">Pairs Left: 0</p>
+      <p id="numPairsMatched">Pairs Matched: 0</p>
+      <p id="totalPairs">Total Pairs: 0</p>
     </div>
     <div class="timer">
-        <p id="timer">Time: 0 seconds</p>
+        <p>Time Limit: 300 seconds</p>
+    </div>
+    <div class="timer">
+      <p id="timer">Time: 0 seconds</p>
     </div>
     <div id="buttons">
-        <button id="startButton">Start</button> 
-        &nbsp;&nbsp;&nbsp;&nbsp;
-        <button id="resetButton">Reset</button>
+      <button id="startButton">Start</button>
+      <button id="resetButton">Reset</button>
     </div>
-    
-    <div id="game_grid">
-        <div class="card">
-            <img id="img1" class="front_face" src="001.png" alt="">
-            <img class="back_face" src="back.webp" alt="">
-        </div>
-        <div class="card">
-            <img id="img2" class="front_face" src="002.png" alt="">
-            <img class="back_face" src="back.webp" alt="">
-        </div>
-        <div class="card">
-            <img id="img3" class="front_face" src="003.png" alt="">
-            <img class="back_face" src="back.webp" alt="">
-        </div>
-        <div class="card">
-            <img id="img4" class="front_face" src="001.png" alt="">
-            <img class="back_face" src="back.webp" alt="">
-        </div>
-        <div class="card">
-            <img id="img5" class="front_face" src="002.png" alt="">
-            <img class="back_face" src="back.webp" alt="">
-        </div>
-        <div class="card">
-            <img id="img6" class="front_face" src="003.png" alt="">
-            <img class="back_face" src="back.webp" alt="">
-        </div>
+    <div id="difficultyButtons">
+      <button id="easyButton">Easy</button>
+      <button id="normalButton">Normal</button>
+      <button id="hardButton">Hard</button>
     </div>
+    <div id="game_grid"></div>
+    <div id="powerUpInfo">
+        <button id="powerUpButton">Use Power-Up</button>
+        &nbsp;&nbsp;
+        <span id="powerUpCount">Power-Up Count: 0</span>
+      </div>
     <div id="winMsg">
-        <p id="winningMessage"></p>
+      <p id="winningMessage"></p>
     </div>
-</body>
-
+    <div class="mode-toggle">
+        <label for="darkModeToggle">Dark Mode</label>
+        <input type="checkbox" id="darkModeToggle">
+      </div>
+  </body>
 </html>
