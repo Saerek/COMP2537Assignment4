@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- import jQuery -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="index.js"></script>
+</head>
+
+<body>
+
+    <div id="header">
+        <p id="numClicks">Number of Clicks: 0</p>
+        <p id="numPairsLeft">Pairs Left: 3</p>
+        <p id="numPairsMatched">Pairs Matched: 0</p>
+        <p id="totalPairs">Total Pairs: 3</p>
+    </div>
+    <div class="timer">
+        <p id="timer">Time: 0 seconds</p>
+    </div>
+    <div id="buttons">
+        <button id="startButton">Start</button> 
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <button id="resetButton">Reset</button>
+    </div>
+    
+    <div id="game_grid">
+        <div class="card">
+            <img id="img1" class="front_face" src="001.png" alt="">
+            <img class="back_face" src="back.webp" alt="">
+        </div>
+        <div class="card">
+            <img id="img2" class="front_face" src="002.png" alt="">
+            <img class="back_face" src="back.webp" alt="">
+        </div>
+        <div class="card">
+            <img id="img3" class="front_face" src="003.png" alt="">
+            <img class="back_face" src="back.webp" alt="">
+        </div>
+        <div class="card">
+            <img id="img4" class="front_face" src="001.png" alt="">
+            <img class="back_face" src="back.webp" alt="">
+        </div>
+        <div class="card">
+            <img id="img5" class="front_face" src="002.png" alt="">
+            <img class="back_face" src="back.webp" alt="">
+        </div>
+        <div class="card">
+            <img id="img6" class="front_face" src="003.png" alt="">
+            <img class="back_face" src="back.webp" alt="">
+        </div>
+    </div>
+    <div id="winMsg">
+        <p id="winningMessage"></p>
+    </div>
+</body>
+
+</html>
